@@ -1,10 +1,1 @@
--- more partial app
-main :: Int
-     =
- let f :: (Int -> Int) =
-        letfun f :: (Int -> Int) x = x + 1;
-
- in let 
-     g :: (Int -> Int) = f;
-
- in g 1;
+main :: [Int] = Cons 2 (Cons 1 (Nil));

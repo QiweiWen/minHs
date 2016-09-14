@@ -11,7 +11,7 @@ data Value = I Integer
            | B Bool
            | Nil
            | Cons Integer Value
-                   | Funcclos {fname::String, bvar::String, env::VEnv, form::Exp}
+           | Funcclos {fname::String, bvar::String, env::VEnv, form::Exp}
            -- Others as needed
            deriving (Show)
 
@@ -28,13 +28,16 @@ evaluate bs = evalE E.empty (Let bs (Var "main"))
 
 
 evalE :: VEnv -> Exp -> Value
---evalE g e | trace (show e ++ "\n" ++ show g) False = undefined
+evalE g e | trace (show e ++ "\n" ++ show g) False = undefined
 evalE g (Con str) = case str of 
         "True" -> B True
         "False"-> B False
+        "Nil"->Nil
         _-> error "unimplemented"
 
 evalE g (Num i) = I i
+
+evalE g (App (App (Con "Cons") e)
 
 evalE g (App (App (Prim op) (Num x)) (Num y)) = case op of
         Add->I (x + y)
@@ -44,7 +47,10 @@ evalE g (App (App (Prim op) (Num x)) (Num y)) = case op of
         Gt->B (x > y)
         Lt->B (x < y)
         Eq->B (x == y)
-        Ne->B (x /= y)
+        Ne->if (y == 0) then
+                error "divide by 0"
+            else
+                B (x /= y)
         Ge->B (x >= y)
         Le->B (x <= y)
 
@@ -94,6 +100,6 @@ isFuncclos val = False
 
 applyFunc g (Funcclos {bvar = boundvar, env = fenv, form = fform, fname = name}) val =
     let fc = Funcclos {bvar = boundvar, env = fenv, form = fform, fname = name}
-    in evalE (E.addAll fenv [(name,fc), (boundvar, val)]) fform
+    in evalE (E.addAll fenv [(boundvar, val),(name,fc)]) fform
 
 
