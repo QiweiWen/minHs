@@ -31,6 +31,7 @@ evalE g e | trace (show e) False = undefined
 evalE g (Con str) = case str of 
 	"True" -> B True
 	"False"-> B False
+	_-> error "unimplemented"
 
 evalE g (Num i) = I i
 
@@ -72,5 +73,20 @@ evalE g (Let [(Bind bound (TypeCon typ) [] (e1))] (e2)) =
 	evalE (E.add g (bound, val)) e2
 		where val = evalE g e1
 
+--so bad it doesn't deserve to be called "hacky"
+--out of time, this must do
+evalE g (Letfun (Bind funcname ftype [] e1)) =
+	evalE g e1
+	
+--unary function, not recursive
+evalE g (App (Letfun (Bind funcname ftype [ids] e1)) (Num intarg)) =
+	evalE (E.add g (ids, (I intarg))) e1
 
+evalE g (App e1 e2) =
+	evalE g (App e1 e2') where
+		e2' = case evalE g e2 of
+			 I val->(Num val)
+			 B True->(Con "True")
+			 B False->(Con "False")
+			 _ -> error ("unimplemented")
 	
